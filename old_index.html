@@ -1,0 +1,194 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Okotoks Community Pass</title>  
+  
+<!-- OPTIONAL ANALYTICS -->  
+<!-- Plausible Analytics -->  
+<!-- <script defer data-domain="yourdomain.com" src="https://plausible.io/js/script.js"></script> -->  
+  
+<!-- Google Analytics -->  
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"></script>  
+<script>  
+  window.dataLayer = window.dataLayer || [];  
+  function gtag(){dataLayer.push(arguments);}  
+  gtag('js', new Date());  
+  gtag('config', 'YOUR_GA_ID');  
+</script> -->  
+  
+<style>  
+    body {  
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  
+        background: #f0f2f5;  
+        margin: 0;  
+        padding: 20px;  
+    }  
+    .container {  
+        background: white;  
+        width: 100%;  
+        max-width: 500px;  
+        margin: 0 auto;  
+        border-radius: 12px;  
+        overflow: hidden;  
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);  
+    }  
+    header {  
+        background: #007a5a;  
+        padding: 20px;  
+        text-align: center;  
+        color: white;  
+    }  
+    header h1 {  
+        margin: 0;  
+        font-size: 24px;  
+    }  
+    header p {  
+        margin: 5px 0 0;  
+        opacity: 0.9;  
+    }  
+    main {  
+        padding: 10px 20px 20px 20px;  
+    }  
+    .offer-card {  
+        background: #f8f9fa;  
+        border: 1px solid #dee2e6;  
+        border-radius: 8px;  
+        margin-bottom: 15px;  
+        padding: 15px;  
+        transition: box-shadow 0.2s;  
+    }  
+    .offer-card:hover {  
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);  
+    }  
+    .offer-card.redeemed {  
+        opacity: 0.6;  
+    }  
+    .offer-card h3 {  
+        margin: 0 0 10px;  
+        color: #343a40;  
+    }  
+    .offer-card p {  
+        margin: 0 0 15px;  
+        color: #6c757d;  
+    }  
+    .offer-code {  
+        background: #e9ecef;  
+        padding: 10px;  
+        border-radius: 6px;  
+        font-family: 'Courier New', Courier, monospace;  
+        font-weight: bold;  
+        text-align: center;  
+        color: #495057;  
+        margin-bottom: 15px;  
+        font-size: 18px;  
+    }  
+    .redeem-btn {  
+        width: 100%;  
+        padding: 12px;  
+        border: none;  
+        border-radius: 6px;  
+        background: #f87d42;  
+        color: white;  
+        font-size: 16px;  
+        font-weight: bold;  
+        cursor: pointer;  
+    }  
+    .redeem-btn:disabled {  
+        background: #6c757d;  
+        cursor: not-allowed;  
+    }  
+    .redeemed-text {  
+        color: #28a745;  
+        font-weight: bold;  
+        text-align: center;  
+    }  
+</style>  
+</head>  
+<body>  
+  
+<div class="container">  
+    <header>  
+        <h1>Okotoks Community Pass</h1>  
+        <p>Your exclusive deals from local main-street businesses.</p>  
+    </header>  
+    <main id="offers-list">  
+        <!-- Offers inserted by JavaScript -->  
+    </main>  
+</div>  
+  
+<script>  
+document.addEventListener('DOMContentLoaded', () => {  
+  
+    // 1. DATA: Partner offers  
+    const offers = [  
+        { id: 'AJ15OFF', merchant: 'Austen Jewellers', description: '15% off your next jewelry purchase.', code_prefix: 'JEWEL15' },  
+        { id: 'E360DEAL', merchant: 'Eyes360', description: '10% off designer frames.', code_prefix: 'FRAMES10' },  
+        { id: 'HTBREW', merchant: 'Hubtown Brewery', description: 'Buy one flight, get a second 50% off.', code_prefix: 'BEER50' }  
+    ];  
+  
+    // 2. TRACKING: Referral source  
+    const params = new URLSearchParams(window.location.search);  
+    const referralSource = params.get('ref') || 'Direct';  
+    const cleanRef = referralSource.replace(/\s+/g, '').toUpperCase();  
+  
+    // Analytics hooks (optional)  
+    if (typeof gtag === 'function') {  
+        gtag('event', 'qr_scan', { 'referral_source': referralSource });  
+    }  
+    if (typeof plausible === 'function') {  
+        plausible('qr_scan', { props: { referral_source: referralSource } });  
+    }  
+    console.log(`Referral Source: ${referralSource}`); // Dev console test  
+  
+    // 3. Redemption state  
+    function getRedeemedOffers() {  
+        return JSON.parse(localStorage.getItem('redeemedCommunityOffers')) || {};  
+    }  
+    function markOfferAsRedeemed(offerId) {  
+        const redeemed = getRedeemedOffers();  
+        redeemed[offerId] = true;  
+        localStorage.setItem('redeemedCommunityOffers', JSON.stringify(redeemed));  
+    }  
+  
+    // 4. Render offers  
+    const offersListContainer = document.getElementById('offers-list');  
+    const redeemedOffers = getRedeemedOffers();  
+  
+    offers.forEach(offer => {  
+        const isRedeemed = redeemedOffers[offer.id] || false;  
+        const dynamicDiscountCode = `${offer.code_prefix}-${cleanRef}`;  
+        const card = document.createElement('div');  
+        card.className = 'offer-card' + (isRedeemed ? ' redeemed' : '');  
+        card.id = `offer-${offer.id}`;  
+        card.innerHTML = `  
+            <h3>${offer.merchant}</h3>  
+            <p>${offer.description}</p>  
+            <div class="offer-code">Use Code: ${dynamicDiscountCode}</div>  
+            ${isRedeemed ? `<p class="redeemed-text">You've already redeemed this offer!</p>` : `<button class="redeem-btn" data-offer-id="${offer.id}">Merchant: Tap to Redeem</button>`}  
+        `;  
+        offersListContainer.appendChild(card);  
+    });  
+  
+    // 5. Click handling  
+    offersListContainer.addEventListener('click', (event) => {  
+        if (event.target.classList.contains('redeem-btn')) {  
+            const button = event.target;  
+            const offerId = button.dataset.offerId;  
+            markOfferAsRedeemed(offerId);  
+            const card = document.getElementById(`offer-${offerId}`);  
+            card.classList.add('redeemed');  
+            button.remove();  
+            const redeemedMessage = document.createElement('p');  
+            redeemedMessage.className = 'redeemed-text';  
+            redeemedMessage.textContent = 'Offer Redeemed!';  
+            card.appendChild(redeemedMessage);  
+        }  
+    });  
+  
+});  
+</script>  
+  
+</body>  
+</html>

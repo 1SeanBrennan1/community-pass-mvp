@@ -1,0 +1,208 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Trigger-and-Offer MVP</title>  
+<style>  
+body {  
+    font-family: Arial, sans-serif;  
+    background: #f0f2f5;  
+    margin: 0;  
+    padding: 0;  
+    display: flex;  
+    justify-content: center;  
+    align-items: flex-start;  
+    min-height: 100vh;  
+}  
+.container {  
+    background: white;  
+    width: 100%;  
+    max-width: 400px;  
+    border-radius: 8px;  
+    overflow: hidden;  
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);  
+}  
+header {  
+    background: #ff7f50; /* orange header */  
+    padding: 15px;  
+    text-align: center;  
+    color: white;  
+}  
+main {  
+    padding: 20px;  
+}  
+.hidden {  
+    display: none;  
+}  
+label {  
+    font-weight: bold;  
+    margin-top: 10px;  
+    display: block;  
+}  
+select, input, button {  
+    width: 100%;  
+    padding: 10px;  
+    margin-top: 5px;  
+    border-radius: 6px;  
+    border: 1px solid #ccc;  
+    font-size: 14px;  
+}  
+button {  
+    background: #007a5a;  
+    color: white;  
+    border: none;  
+    margin-top: 15px;  
+    cursor: pointer;  
+}  
+button:hover {  
+    background: #005c44;  
+}  
+#qrcode-container {  
+    text-align: center;  
+    margin-top: 20px;  
+}  
+#qrcode {  
+    margin: 15px auto;  
+    padding: 10px;  
+    background: white;  
+    border: 1px solid #eee;  
+    display: inline-block;  
+}  
+.offer-display {  
+    background: #fff3e0;  
+    padding: 15px;  
+    border-radius: 8px;  
+    text-align: center;  
+}  
+.redeemed {  
+    background: #ffcdd2;  
+    padding: 15px;  
+    border-radius: 8px;  
+    text-align: center;  
+    font-weight: bold;  
+    color: #c62828;  
+}  
+</style>  
+</head>  
+<body>  
+  
+<div class="container">  
+  
+    <!-- View 1: Generate Offer -->  
+    <section id="view-generate">  
+        <header>  
+            <h2>Generate Customer Offer</h2>  
+        </header>  
+        <main>  
+            <label for="partner">Select Partner Business:</label>  
+            <select id="partner">  
+                <option>Austen Jewellers</option>  
+                <option>Eyes360</option>  
+            </select>  
+  
+            <label for="offer">Offer Details:</label>  
+            <input type="text" id="offer" value="15% off next purchase">  
+  
+            <button id="generate-btn">Generate Offer QR Code</button>  
+  
+            <div id="qrcode-container" class="hidden">  
+                <h3>Show this to the customer:</h3>  
+                <div id="qrcode"></div>  
+                <button id="reset-btn">Done</button>  
+            </div>  
+        </main>  
+    </section>  
+  
+    <!-- View 2: Offer Display -->  
+    <section id="view-offer" class="hidden">  
+        <header>  
+            <h2>Customer Offer</h2>  
+        </header>  
+        <main id="offer-display">  
+            <!-- Populated dynamically -->  
+        </main>  
+    </section>  
+  
+</div>  
+  
+<!-- QR Code Library -->  
+<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>  
+<script>  
+document.addEventListener('DOMContentLoaded', () => {  
+    const viewGenerate = document.getElementById('view-generate');  
+    const viewOffer = document.getElementById('view-offer');  
+    const qrcodeContainer = document.getElementById('qrcode-container');  
+    const qrcodeDiv = document.getElementById('qrcode');  
+    const generateBtn = document.getElementById('generate-btn');  
+    const resetBtn = document.getElementById('reset-btn');  
+    const offerDisplay = document.getElementById('offer-display');  
+  
+    function getRedeemedCodes() {  
+        return JSON.parse(localStorage.getItem('redeemedCodes')) || [];  
+    }  
+    function addRedeemedCode(code) {  
+        const codes = getRedeemedCodes();  
+        if (!codes.includes(code)) {  
+            codes.push(code);  
+            localStorage.setItem('redeemedCodes', JSON.stringify(codes));  
+        }  
+    }  
+    function showView(view) {  
+        viewGenerate.classList.add('hidden');  
+        viewOffer.classList.add('hidden');  
+        document.getElementById(view).classList.remove('hidden');  
+    }  
+    generateBtn.addEventListener('click', () => {  
+        const partner = document.getElementById('partner').value;  
+        const offer = document.getElementById('offer').value;  
+        const uniqueCode = Date.now().toString(36) + Math.random().toString(36).substr(2);  
+  
+        const url = `${window.location.href.split('?')[0]}?code=${uniqueCode}&partner=${encodeURIComponent(partner)}&offer=${encodeURIComponent(offer)}`;  
+  
+        qrcodeDiv.innerHTML = '';  
+        new QRCode(qrcodeDiv, {  
+            text: url,  
+            width: 200,  
+            height: 200  
+        });  
+  
+        qrcodeContainer.classList.remove('hidden');  
+    });  
+    resetBtn.addEventListener('click', () => {  
+        qrcodeContainer.classList.add('hidden');  
+        document.getElementById('offer').value = "15% off next purchase";  
+    });  
+    function handleIncomingOffer() {  
+        const params = new URLSearchParams(window.location.search);  
+        const code = params.get('code');  
+        if (code) {  
+            showView('view-offer');  
+            const redeemedCodes = getRedeemedCodes();  
+            if (redeemedCodes.includes(code)) {  
+                offerDisplay.innerHTML = `<div class="redeemed">This offer has already been redeemed.</div>`;  
+                return;  
+            }  
+            const partner = decodeURIComponent(params.get('partner'));  
+            const offer = decodeURIComponent(params.get('offer'));  
+            offerDisplay.innerHTML = `  
+                <div class="offer-display">  
+                    <h3>Offer for ${partner}</h3>  
+                    <p><strong>Your Offer:</strong> ${offer}</p>  
+                    <p>Present to cashier to redeem.</p>  
+                </div>  
+                <button id="redeem-btn">Merchant: Tap to Redeem</button>  
+            `;  
+            document.getElementById('redeem-btn').addEventListener('click', () => {  
+                addRedeemedCode(code);  
+                offerDisplay.innerHTML = `<div class="redeemed">Offer Redeemed! Thank you for supporting local!</div>`;  
+            });  
+        } else {  
+            showView('view-generate');  
+        }  
+    }  
+    handleIncomingOffer();  
+});  
+</script>  
+</body>  
+</html>
