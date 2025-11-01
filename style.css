@@ -1,0 +1,85 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+header {
+    background: #007a5a;
+    padding: 20px;
+    text-align: center;
+    color: white;
+}
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+header p {
+    margin: 5px 0 0;
+    opacity: 0.9;
+}
+main {
+    padding: 10px 20px 20px 20px;
+}
+.offer-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    transition: box-shadow 0.2s;
+}
+.offer-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.offer-card.redeemed {
+    opacity: 0.6;
+}
+.offer-card h3 {
+    margin: 0 0 10px;
+    color: #343a40;
+}
+.offer-card p {
+    margin: 0 0 15px;
+    color: #6c757d;
+}
+.offer-code {
+    background: #e9ecef;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    text-align: center;
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+.redeem-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #f87d42;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.redeem-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+.redeemed-text {
+    color: #28a745;
+    font-weight: bold;
+    text-align: center;
+}
