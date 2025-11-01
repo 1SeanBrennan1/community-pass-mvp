@@ -1,0 +1,8 @@
+{
+  "name": "community-pass-api",
+  "version": "1.0.0",
+  "description": "API for Community Pass MVP",
+  "dependencies": {
+    "tedious": "^16.0.0"
+  }
+}
