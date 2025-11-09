@@ -1,0 +1,12 @@
+# Ignore the virtual environment folder
+venv/
+
+# Ignore the SQLite database file
+scans.db
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore the passwords if created later
+.env

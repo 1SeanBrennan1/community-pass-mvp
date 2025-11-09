@@ -1,0 +1,90 @@
+<!-- templates/dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Downtown<br>Loop</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        h1, h2 { text-align: center; }
+        #chart-container { width: 80%; max-width: 900px; margin: 40px auto; }
+        table { width: 80%; margin: 40px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>Community Pass Analytics</h1>
+
+    <div id="chart-container">
+        <h2>Referral Activity</h2>
+        <canvas id="referralChart"></canvas>
+    </div>
+
+    <h2>Full Redemption Log</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp (UTC)</th>
+                <th>Referrer</th>
+                <th>Redeemed At</th>
+                <th>Offer ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for redemption in redemptions %}
+            <tr>
+                <td>{{ redemption.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ redemption.referrer_id }}</td>
+                <td>{{ redemption.offering_biz }}</td>
+                <td>{{ redemption.offer_id }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<script>
+    const ctx = document.getElementById('referralChart').getContext('2d');
+
+    // Data passed from Flask is safely injected here
+    const chartLabels = {{ chart_labels|safe }};
+    const chartData = {{ chart_data|safe }};
+
+    const referralChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: '# of Redemptions',
+                data: chartData,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            indexAxis: 'y', // Makes it a horizontal bar chart for readability
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
